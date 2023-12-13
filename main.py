@@ -36,7 +36,7 @@ with urllib.request.urlopen(url) as response:
     states_geojson = json.loads(response.read())
 
 app = dash.Dash(__name__)
-
+server = app.server
 company_locations = {
     'Western Systems': pd.DataFrame({
         'lat': [42.3265, 32.7157, 34.0961, 34.3917, 38.7296, 37.6688, 36.6002],

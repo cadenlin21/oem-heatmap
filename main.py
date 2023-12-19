@@ -163,7 +163,8 @@ def update_map(selected_company):
             hovertext=locations['name'],
             marker=dict(size=10, symbol='circle', color='red'),
             mode='markers+text',
-            textposition='bottom center'
+            textposition='bottom center',
+            name = 'ATC Deployment'
         )
 
     fig.write_html('heatmap.html')

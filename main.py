@@ -109,6 +109,11 @@ company_locations = {
             'lon': [-86.9833],
             'name': ['Decatur, AL']
         }),
+        'Oriux': pd.DataFrame({
+            'lat': [44.9778, 40.7128, 42.3601, 41.8781],
+            'lon': [-93.2650, -74.0060, -71.0589, -87.6298],
+            'name': ['Minneapolis, MN', 'New York City, NY', 'Boston, MA', 'Chicago, IL']
+        }),
 
 }
 # company_locations = {

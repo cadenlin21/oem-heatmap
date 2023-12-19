@@ -71,17 +71,20 @@ app.layout = html.Div([
     [Input('company-selector', 'value')]
 )
 def update_map(selected_company):
+    time_basis = " (June 2021 - April 2023)"  # Time basis string
+
     if selected_company == 'Total Coverage':
-        # Handle the total number of companies
+        title = 'Total Coverage' + time_basis
         fig = px.choropleth(data,
                             geojson=states_geojson,
                             locations='State',
                             featureidkey="properties.name",
                             color='Total Coverage',
                             scope="usa",
-                            color_continuous_scale='Blues')
+                            color_continuous_scale='Blues',
+                            title=title)
     else:
-        # Handle individual companies
+        title = selected_company + time_basis
         filtered_data = data[['State', selected_company]].copy()
         filtered_data['Presence'] = filtered_data[selected_company].apply(lambda x: 'Present' if x == 1 else 'Absent')
         fig = px.choropleth(filtered_data,
@@ -90,16 +93,18 @@ def update_map(selected_company):
                             featureidkey="properties.name",
                             color='Presence',
                             color_discrete_map={'Present': 'blue', 'Absent': 'grey'},
-                            scope="usa")
+                            scope="usa",
+                            title=title)
 
-    fig.update_geos(fitbounds="locations", visible=False)
+    fig.update_geos(fitbounds="locations", visible=False, center={"lat": 37.0902, "lon": -95.7129}) # Center coordinates for the USA
+
     if selected_company in company_locations:
         locations = company_locations[selected_company]
         fig.add_scattergeo(
             lon=locations['lon'],
             lat=locations['lat'],
-            hoverinfo='text',  # Show only custom text
-            hovertext=locations['name'],  # Custom text for each marker
+            hoverinfo='text',
+            hovertext=locations['name'],
             marker=dict(size=10, symbol='circle', color='red'),
             mode='markers+text',
             textposition='bottom center'
@@ -107,6 +112,7 @@ def update_map(selected_company):
 
     fig.write_html('heatmap.html')
     return fig
+
 
 if __name__ == '__main__':
     app.run_server(debug=False)

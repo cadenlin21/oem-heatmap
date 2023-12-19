@@ -138,7 +138,7 @@ def update_map(selected_company):
     else:
         title = selected_company + time_basis
         filtered_data = data[['State', selected_company]].copy()
-        filtered_data['Presence'] = filtered_data[selected_company].apply(lambda x: 'Present' if x == 1 else 'Absent')
+        filtered_data['Key'] = filtered_data[selected_company].apply(lambda x: 'Present' if x == 1 else 'Absent')
         fig = px.choropleth(filtered_data,
                             geojson=states_geojson,
                             locations='State',
@@ -164,6 +164,7 @@ def update_map(selected_company):
             marker=dict(size=10, symbol='circle', color='red'),
             mode='markers+text',
             textposition='bottom center'
+            name = 'ATC Deployment'
         )
 
     fig.write_html('heatmap.html')

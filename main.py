@@ -104,6 +104,11 @@ company_locations = {
             'lon': [-94.9774, -84.3877, -80.6327, -122.2913, -87.6298],
             'name': ['Baytown, TX', 'Atlanta, GA', 'Miami-Dade County, FL', 'Bay Area, CA', 'Chicago, IL']
         }),
+        'Temple': pd.DataFrame({
+            'lat': [34.6059],
+            'lon': [-86.9833],
+            'name': ['Decatur, AL']
+        }),
 
 }
 # company_locations = {

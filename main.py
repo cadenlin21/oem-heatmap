@@ -96,7 +96,9 @@ def update_map(selected_company):
                             scope="usa",
                             title=title)
 
-    fig.update_geos(fitbounds="locations", visible=False, center={"lat": 37.0902, "lon": -95.7129}) # Center coordinates for the USA
+    fig.update_geos(center=dict(lat=39.8283, lon=-98.5795), lataxis_range=[15, 50],  # Adjust as needed
+    lonaxis_range=[-125, -75]  # Adjust as needed)
+
 
     if selected_company in company_locations:
         locations = company_locations[selected_company]

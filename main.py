@@ -5,6 +5,18 @@ import urllib.request
 import dash
 from dash import html, dcc, Input, Output
 
+
+company_links = {
+    'McCain': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=mI26be&nav=MTVfezAwMDAwMDAwLTAwMDEtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMH0',
+    'Econolite': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=JkvJTJ&nav=MTVfe0RDOTg4M0NDLTYzQzQtNDg5QS05QTUzLTMxMTFEOERCQTJCNn0',
+    'Q-Free': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=svgA3R&nav=MTVfezU0REFCQ0U2LTc3MDItNEUxMC1CQzNFLUM1MTY3QTI2QUVCM30',
+    'Cubic': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=xeJ5kh&nav=MTVfezBDN0I4RjJGLUNGNDktNDI5QS1CRUQ2LTU1MkEwMDUyNzhGOH0',
+    'Temple': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=iS5Pda&nav=MTVfe0FEMzU0NzEzLTZFM0MtNDJCQi05QzVCLTQ4MEYzOUY3QjVENX0',
+    'Oriux': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=viVw83&nav=MTVfezY0RjExNUI2LTkzNzAtNDlBQS1CNTZELTlDQkNBQTQzODI4MX0',
+    'Western Systems': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=N48TKH&nav=MTVfe0MyQTExMjc2LTYwMjYtNEMyQy1CNENBLTI1MEYyMDcxNkZCNn0',
+    'Mobotrex': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=QhxYsJ&nav=MTVfezU4RTRFQzY2LTRBRDYtNDY3OS1CRThELTQxMzkyQjY0NzQ3Rn0'
+}
+
 # Install the required packages by running:
 # pip install plotly pandas
 
@@ -98,6 +110,12 @@ app.layout = html.Div([
         id='choropleth-map',
         style={'height': '80vh', 'width': '100%'}  # Adjust the height and width as needed
     )
+    html.A(
+        id='qualitative-link',
+        children='Link to Qualitative Companion',
+        href='',  # Initially empty
+        style={'display': 'block', 'margin-top': '20px', 'text-align': 'center'}
+    )
 ])
 
 @app.callback(
@@ -150,6 +168,15 @@ def update_map(selected_company):
 
     fig.write_html('heatmap.html')
     return fig
+
+@app.callback(
+    Output('qualitative-link', 'href'),
+    [Input('company-selector', 'value')]
+)
+def update_link(selected_company):
+    # Default link if company is not found in the dictionary
+    default_link = 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/_layouts/15/Doc.aspx?sourcedoc=%7B70159d8b-2ea1-47cd-b8c1-47f3c3153251%7D&action=editnew'
+    return company_links.get(selected_company, default_link)
 
 
 if __name__ == '__main__':

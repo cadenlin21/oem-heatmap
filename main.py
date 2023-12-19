@@ -114,6 +114,11 @@ company_locations = {
             'lon': [-93.2650, -74.0060, -71.0589, -87.6298],
             'name': ['Minneapolis, MN', 'New York City, NY', 'Boston, MA', 'Chicago, IL']
         }),
+        'Mobotrex': pd.DataFrame({
+            'lat': [41.8781, 44.9778, 37.9268, 38.9072],
+            'lon': [-87.6298, -93.2650, -78.0249, -77.0369],
+            'name': ['Chicago, IL', 'Minneapolis, MN', 'Central Virgina, VA', 'Washington DC']
+        }),
 
 }
 # company_locations = {

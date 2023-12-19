@@ -43,6 +43,11 @@ company_locations = {
         'lon': [-122.8756, -117.1611, -118.1058, -118.5426, -120.7985, -122.0810, -121.8947],
         'name': ['Medford, OR', 'San Diego, CA', 'San Gabriel, CA', 'Santa Clarita, CA', 'Placerville, CA', 'Hayward, CA', 'Monterey, CA']
     }),
+    'McCain': pd.DataFrame({
+        'lat': [33.4242, 30.0933, 34.0536, 30.5066, 33.1580, 32.9545, 42.6511, 42.8867, 34.1397, 41.1670, 37.779, 39.7392, 32.7531, 32.8140, 38.9012, 33.4709, 33.4151, 33.1433],
+        'lon': [-111.9280, -95.9886, -118.2427, -97.8303, -117.3505, -97.0150, -73.7549, -78.8783, -118.0353, -73.2048, -122.4199, -104.9848, -97.3327, -96.9488, -77.2652, -81.9748, -111.8314, -117.1661],
+        'name': ['Arizona State University, AZ', 'Prairie View A&M University, TX', 'Los Angeles, CA', 'Cedar Park, TX', 'Carlsbad, CA', 'Coppell, TX', 'Albany, NY', 'Buffalo, NY', 'Arcadia, CA', 'Bridgeport, CT', 'San Francisco, CA', 'Denver, CO', 'Fort Worth, TX', 'Irving, TX', 'Vienna, VA', 'Augusta, GA', 'Mesa, AZ', 'San Marcos, CA']
+    }),
 
 }
 # company_locations = {

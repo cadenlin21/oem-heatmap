@@ -109,7 +109,7 @@ app.layout = html.Div([
     dcc.Graph(
         id='choropleth-map',
         style={'height': '80vh', 'width': '100%'}  # Adjust the height and width as needed
-    )
+    ),
     html.A(
         id='qualitative-link',
         children='Link to Qualitative Companion',

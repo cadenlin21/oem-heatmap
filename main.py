@@ -138,7 +138,7 @@ def update_map(selected_company):
     else:
         title = selected_company + time_basis
         filtered_data = data[['State', selected_company]].copy()
-        filtered_data['Key'] = filtered_data[selected_company].apply(lambda x: 'Present' if x == 1 else 'Absent')
+        filtered_data['Presence'] = filtered_data[selected_company].apply(lambda x: 'Present' if x == 1 else 'Absent')
         fig = px.choropleth(filtered_data,
                             geojson=states_geojson,
                             locations='State',

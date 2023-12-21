@@ -100,9 +100,9 @@ company_locations = {
             'name': ['Indiana Department of Transportation, IN', 'Fort Worth, TX', 'North Carolina Department of Transportation, NC', 'Los Gatos, CA']
         }),
         'Cubic': pd.DataFrame({
-            'lat': [29.7355, 25.5516, 37.8272, 41.8781],
-            'lon': [-94.9774, -80.6327, -122.2913, -87.6298],
-            'name': ['Baytown, TX', 'Miami-Dade County, FL', 'Bay Area, CA', 'Chicago, IL']
+            'lat': [29.7355, 25.5516, 37.8272],
+            'lon': [-94.9774, -80.6327, -122.2913],
+            'name': ['Baytown, TX', 'Miami-Dade County, FL', 'Bay Area, CA']
         }),
         'Temple': pd.DataFrame({
             'lat': [34.6059],

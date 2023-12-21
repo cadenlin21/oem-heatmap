@@ -90,9 +90,9 @@ company_locations = {
         ]
         }),
         'Econolite': pd.DataFrame({
-            'lat': [34.3872, 35.2271, 37.3387, 36.1540, 27.9904, 39.0997, 26.8946, 29.5693],
-            'lon': [-118.1123, -80.8431, -121.8853, -95.9928, -82.3018, -94.5786, -81.9098, 95.8143],
-            'name': ['Los Angeles County, CA', 'Charlotte, NC', 'San Jose, CA', 'Tusla, OK', 'Hillsborough County, FL', 'Kansas City, MO', 'Charlotte County, FL', 'County of Fort Bend, TX']
+            'lat': [35.2271, 37.3387, 36.1540, 27.9904, 39.0997, 26.8946, 29.5693],
+            'lon': [-80.8431, -121.8853, -95.9928, -82.3018, -94.5786, -81.9098, 95.8143],
+            'name': ['Charlotte, NC', 'San Jose, CA', 'Tusla, OK', 'Hillsborough County, FL', 'Kansas City, MO', 'Charlotte County, FL', 'County of Fort Bend, TX']
         }),
         'Q-Free': pd.DataFrame({
             'lat': [39.7690, 32.7555, 35.7800, 37.2358],

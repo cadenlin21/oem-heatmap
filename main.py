@@ -153,10 +153,9 @@ app.layout = html.Div([
     [Input('company-selector', 'value')]
 )
 def update_map(selected_company):
-    time_basis = " (June 2021 - April 2023)"  # Time basis string
 
     if selected_company == 'Total Coverage':
-        title = 'Total Coverage' + time_basis
+        title = 'Total Coverage'
         fig = px.choropleth(data,
                             geojson=states_geojson,
                             locations='State',
@@ -166,7 +165,7 @@ def update_map(selected_company):
                             color_continuous_scale='Blues',
                             title=title)
     else:
-        title = selected_company + time_basis
+        title = selected_company
         filtered_data = data[['State', selected_company]].copy()
         filtered_data['Key'] = filtered_data[selected_company].apply(lambda x: 'Present' if x == 1 else 'Absent')
         fig = px.choropleth(filtered_data,

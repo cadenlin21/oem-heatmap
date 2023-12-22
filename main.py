@@ -5,31 +5,8 @@ import urllib.request
 import dash
 from dash import html, dcc, Input, Output
 
-# Install the required packages by running:
-# pip install plotly pandas
 
-# Load your data
-data = pd.read_csv('Heatmap data.csv')  # Replace with your data file
-# colorscale = ["rgb(128, 128, 128)", "rgb(210, 231, 154)", "rgb(94, 179, 39)", "rgb(67, 136, 33)", "rgb(33, 74, 12)"]
-# # Load GeoJSON for US states
-# url = "https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json"
-# with urllib.request.urlopen(url) as response:
-#     states_geojson = json.loads(response.read())
-#
-# # Create the choropleth map
-# fig = px.choropleth(data_frame=data,
-#                     geojson=states_geojson,
-#                     locations='State',  # Replace with your column name for states
-#                     featureidkey="properties.name",  # Path in GeoJSON to the state name
-#                     color_continuous_scale=colorscale,
-#                     color='OEMs_Present',  # Replace with your column name for the values
-#                     scope="usa",
-#                     title='OEM Coverage Map')
-#
-# fig.update_geos(fitbounds="locations", visible=False)
-# fig.write_html('heatmap.html')
-# fig.show()
-
+data = pd.read_csv('Heatmap data.csv')
 
 url = "https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json"
 with urllib.request.urlopen(url) as response:
@@ -45,15 +22,6 @@ company_locations = {
     }),
 
 }
-# company_locations = {
-#     'McCain': pd.DataFrame({
-#         'lat': [34.0522, 36.7783, 42.3265],  # Example latitudes
-#         'lon': [-118.2437, -119.4179, -122.8756],  # Example longitudes
-#         'name': ['Location 1', 'Location 2']  # Names or descriptions of locations
-#     }),
-#     # Add similar DataFrames for other companies
-# }
-
 app.layout = html.Div([
     dcc.Dropdown(
         id='company-selector',
@@ -92,7 +60,14 @@ def update_map(selected_company):
                             color_discrete_map={'Present': 'blue', 'Absent': 'grey'},
                             scope="usa")
 
-    fig.update_geos(fitbounds="locations", visible=False)
+    fig.update_geos(
+        center=dict(lat=39.8283, lon=-98.5795),
+        lataxis_range=[15, 50],  # Adjust as needed
+        lonaxis_range=[-125, -75]  # Adjust as needed
+    )
+
+    # fig.update_layout(height=300)  # Adjust the height as needed
+
     if selected_company in company_locations:
         locations = company_locations[selected_company]
         fig.add_scattergeo(
@@ -109,4 +84,4 @@ def update_map(selected_company):
     return fig
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)

@@ -250,7 +250,7 @@ def update_maps(coverage_selection, selected_companies, show_general_regions):
 )
 def update_link(selected_company):
     # Default link if company is not found in the dictionary
-    default_link = 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/_layouts/15/Doc.aspx?sourcedoc=%7B70159d8b-2ea1-47cd-b8c1-47f3c3153251%7D&action=editnew'
+    default_link = 'https://growthcommercial.sharepoint.com/:x:/s/GC/EYudFXChLs1HuMFH88MVMlEBJrZadQgTlA27aCspMkW5mA?e=v7cf66&nav=MTVfezU3ODMxQzJDLUE3QUItNEI5Qi1BQTdELTU3QUNFNzk4N0YyNX0'
     return default_link
 
 

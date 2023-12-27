@@ -81,7 +81,7 @@ app.layout = html.Div([
     dcc.Checklist(
         id='show-general-regions',
         options=[
-            {'label': 'Show General Regions', 'value': 'show_regions'}
+            {'label': 'Show General Regions on Map', 'value': 'show_regions'}
         ],
         value=[],
         style={'display': 'none'}  # Initially hidden
@@ -104,7 +104,11 @@ app.layout = html.Div([
         style={'width': '100vw', 'height': '80vh', 'display': 'flex', 'flexDirection': 'column'}
     ),
     html.Div(id='clicked-state-info', style={'fontSize': 20, 'marginTop': 20, 'textAlign': 'left'}),
-    html.Div(id='hidden-click-data', style={'display': 'none'})
+    html.Div(id='hidden-click-data', style={'display': 'none'}),
+    # html.Div([
+    #     html.H4("Locations"),
+    #     html.Div(id='locations-list')
+    # ], style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'})
 ])
 
 @app.callback(
@@ -126,6 +130,34 @@ def toggle_dropdown(selection):
         return {'display': 'block'}
     else:
         return {'display': 'none'}
+
+
+# @app.callback(
+#     Output('locations-list', 'children'),
+#     [Input('company-selector', 'value')]
+# )
+# def update_locations_list(selected_companies):
+#     if not selected_companies:
+#         return "Select a company to view locations"
+#
+#     all_locations = []
+#     for company in selected_companies:
+#         cities = atc_locations.get(company, [])
+#         cities = cities['name']
+#         regions = atc_regions.get(company, [])
+#         regions = regions['name']
+#
+#         cities_list = html.Ul([html.Li(city) for city in cities])
+#         regions_list = html.Ul([html.Li(region) for region in regions])
+#
+#         all_locations.extend([
+#             html.H5(f"{company} ATC Cities:"),
+#             cities_list,
+#             html.H5(f"{company} ATC Regions:"),
+#             regions_list
+#         ])
+#
+#     return all_locations
 
 
 @app.callback(
@@ -159,7 +191,8 @@ def update_maps(coverage_selection, selected_companies, show_general_regions):
             lataxis_range=[15, 50],  # Adjust as needed
             lonaxis_range=[-125, -75]  # Adjust as needed
         )
-        maps.append(fig)
+        # maps.append(fig)
+        return [dcc.Graph(figure=fig, id='total-coverage-map')]
     else:
         if coverage_selection == 'all':
             selected_companies = ['McCain', 'Econolite', 'Cubic', 'Mobotrex', 'Q-Free', 'Western Systems', 'Temple', 'Oriux']
@@ -205,12 +238,18 @@ def update_maps(coverage_selection, selected_companies, show_general_regions):
                     lon=regions['lon'],
                     lat=regions['lat'],
                     hoverinfo='text',
-                    text=regions['name'],
+                    text=regions['name'],  # Text labels
+                    # mode='markers+text',  # Display both markers and text
                     marker=dict(
                         size=17.5,
-                        color='orange',
-                        opacity=0.5
+                        color='LightCoral',
+                        opacity=0.7
                     ),
+                    # textposition='top center',  # Position of the text
+                    # line=dict(  # Line properties
+                    #     width=1,
+                    #     color='LightCoral',
+                    # ),
                     name=f"{company} ATC Regions"
                 )
             )
@@ -231,17 +270,40 @@ def update_maps(coverage_selection, selected_companies, show_general_regions):
                 lataxis_range=[15, 50],  # Adjust as needed
                 lonaxis_range=[-125, -75]  # Adjust as needed
             )
-            maps.append(fig)
+            fig.update_layout(
+                font=dict(family='Balto', size=15, color='black'),
+                height=400,
+                autosize=True,
+                margin=dict(l=35, r=35, t=35, b=35)
+            )
+            # maps.append(fig)
 
-    for fig in maps:
-        fig.update_layout(
-            font=dict(family='Balto', size=15, color='black'),
-            autosize=True,
-            margin=dict(l=35, r=35, t=35, b=35)
-        )
-    if coverage_selection == 'total':
-        return [dcc.Graph(figure=fig, id='total-coverage-map') for fig in maps]
-    return [dcc.Graph(figure=fig, id='total-coverage-map') for fig in maps]
+            cities = atc_locations.get(company, [])
+            cities = cities['name']
+            regions = atc_regions.get(company, [])
+            regions = regions['name']
+            generals = general_locations.get(company, [])
+            generals = generals['name']
+            cities_list = html.Ul([html.Li(city) for city in cities])
+            regions_list = html.Ul([html.Li(region) for region in regions])
+            general_list = html.Ul([html.Li(general) for general in generals])
+
+            combined_layout = html.Div([
+                dcc.Graph(figure=fig, style={'flex': '3', 'min-width': '300px'}),  # Map with flexible width
+                html.Div([
+                    html.H5(f"{company} ATC Cities:"),
+                    cities_list,
+                    html.H5(f"{company} ATC Regions:"),
+                    regions_list,
+                    html.H5(f"{company} General Locations:"),
+                    general_list
+                ], style={'flex': '1', 'min-width': '200px', 'max-height': '400px', 'overflow-y': 'auto'})  # Scroll for long lists
+            ], style={'display': 'flex', 'width': '100%', 'align-items': 'stretch', 'margin-bottom': '20px'})
+
+            maps.append(combined_layout)
+
+    return maps
+    # return [dcc.Graph(figure=fig, id='total-coverage-map') for fig in maps]
 
 
 @app.callback(

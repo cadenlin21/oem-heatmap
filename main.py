@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 import json
 import urllib.request
 import dash
-from dash import html, dcc, Input, Output
+from dash import html, dcc, Input, Output, ALL
 
 company_links = {
     'McCain': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=ikMnZe&nav=MTVfezU3ODMxQzJDLUE3QUItNEI5Qi1BQTdELTU3QUNFNzk4N0YyNX0',
@@ -19,13 +19,18 @@ company_links = {
 
 # Load your data
 data = pd.read_excel('heatmap_data.xlsx', sheet_name='Total')
-def get_companies_present(row):
-    companies_present = [company for company in company_links.keys() if row[company] == 1]
-    companies_count = len(companies_present)
-    companies_list = ', '.join(companies_present) if companies_present else 'None'
-    return companies_count, companies_list
 
-data[['OEMs_count', 'hover_text']] = data.apply(get_companies_present, axis=1, result_type='expand')
+
+def get_companies_info(row):
+    companies_present = [company for company in company_links.keys() if row[company] == 1]
+    companies_not_present = [company for company in company_links.keys() if row[company] != 1]
+
+    companies_present_str = ', '.join(companies_present) if companies_present else 'None'
+    companies_not_present_str = ', '.join(companies_not_present) if companies_not_present else 'None'
+
+    return companies_present_str, companies_not_present_str
+
+data[['hover_text_present', 'hover_text_not_present']] = data.apply(get_companies_info, axis=1, result_type='expand')
 url = "https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json"
 with urllib.request.urlopen(url) as response:
     states_geojson = json.loads(response.read())
@@ -66,7 +71,8 @@ general_locations = {
     'Oriux': pd.read_excel('general_cities.xlsx', sheet_name="Oriux"),
     'Mobotrex': pd.read_excel('general_cities.xlsx', sheet_name="Mobotrex"),
 }
-
+oem_list = ['McCain', 'Econolite', 'Q-Free', 'Cubic', 'Temple', 'Oriux', 'Western Systems', 'Mobotrex']
+dropdown_options = [{'label': f'{i+1}. {oem}', 'value': oem} for i, oem in enumerate(oem_list)]
 app.layout = html.Div([
     dcc.RadioItems(
         id='coverage-selection',
@@ -88,9 +94,9 @@ app.layout = html.Div([
     ),
     dcc.Dropdown(
         id='company-selector',
-        options=[{'label': company, 'value': company} for company in data.columns if company not in ['State', 'Total Coverage', 'OEMs_count', 'hover_text']],
+        options=dropdown_options,
         multi=True,
-        style={'display': 'none'}  # Initially hidden
+        style={'display': 'none'}  # Adjust the style as needed
     ),
     html.A(
         id='qualitative-link',
@@ -104,12 +110,11 @@ app.layout = html.Div([
         style={'width': '100vw', 'height': '80vh', 'display': 'flex', 'flexDirection': 'column'}
     ),
     html.Div(id='clicked-state-info', style={'fontSize': 20, 'marginTop': 20, 'textAlign': 'left'}),
-    html.Div(id='hidden-click-data', style={'display': 'none'}),
-    # html.Div([
-    #     html.H4("Locations"),
-    #     html.Div(id='locations-list')
-    # ], style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'})
+    html.Div(id='hidden-click-data', style={'display': 'none'})
 ])
+
+
+
 
 @app.callback(
     Output('show-general-regions', 'style'),
@@ -132,34 +137,6 @@ def toggle_dropdown(selection):
         return {'display': 'none'}
 
 
-# @app.callback(
-#     Output('locations-list', 'children'),
-#     [Input('company-selector', 'value')]
-# )
-# def update_locations_list(selected_companies):
-#     if not selected_companies:
-#         return "Select a company to view locations"
-#
-#     all_locations = []
-#     for company in selected_companies:
-#         cities = atc_locations.get(company, [])
-#         cities = cities['name']
-#         regions = atc_regions.get(company, [])
-#         regions = regions['name']
-#
-#         cities_list = html.Ul([html.Li(city) for city in cities])
-#         regions_list = html.Ul([html.Li(region) for region in regions])
-#
-#         all_locations.extend([
-#             html.H5(f"{company} ATC Cities:"),
-#             cities_list,
-#             html.H5(f"{company} ATC Regions:"),
-#             regions_list
-#         ])
-#
-#     return all_locations
-
-
 @app.callback(
     Output('maps-container', 'children'),
     [Input('coverage-selection', 'value'),
@@ -171,20 +148,20 @@ def update_maps(coverage_selection, selected_companies, show_general_regions):
     if not isinstance(selected_companies, list):
         selected_companies = [selected_companies]
     if coverage_selection == 'total':
-        data[['OEMs_count', 'hover_text']] = data.apply(get_companies_present, axis=1, result_type='expand')
+        data[['hover_text_present', 'hover_text_not_present']] = data.apply(get_companies_info, axis=1, result_type='expand')
         fig = px.choropleth(
             data,
             geojson=states_geojson,
             locations='State',
             featureidkey="properties.name",
             color='Total Coverage',
-            hover_data={'State': True, 'OEMs_count': True, 'hover_text': True},
+            hover_data={'State': True, 'hover_text_present': True, 'hover_text_not_present': True},
             scope="usa",
             color_continuous_scale='Blues',
             title='Total Coverage'
         )
         fig.update_traces(
-            hovertemplate="<b>%{customdata[0]}</b><br>Number of OEMs: %{customdata[1]}<br>OEMs present: %{customdata[2]}<extra></extra>"
+            hovertemplate="<b>%{customdata[0]}</b><br>OEMs present: %{customdata[1]}<br>OEMs not present: %{customdata[2]}<extra></extra>"
         )
         fig.update_geos(
             center=dict(lat=39.8283, lon=-98.5795),
@@ -207,38 +184,44 @@ def update_maps(coverage_selection, selected_companies, show_general_regions):
             ]
         for i, company in enumerate(selected_companies):
             filtered_data = data[['State', company]].copy()
-            filtered_data['Key'] = filtered_data[company].apply(lambda x: 'Present' if x == 1 else 'Absent')
+            filtered_data['Presence'] = filtered_data[company].apply(lambda x: 'Present' if x == 1 else 'Absent')
 
             fig = px.choropleth(
                 filtered_data,
                 geojson=states_geojson,
                 locations='State',
                 featureidkey="properties.name",
-                color='Key',
-                category_orders={'Key': ['Present', 'Absent']},
+                color='Presence',
+                hover_data={'State': False, 'Presence': True},  # Explicitly set hover data
+                # category_orders={'Key': ['Present', 'Absent']},
                 color_discrete_map={'Present': 'lightblue', 'Absent': 'grey'},
                 scope="usa",
                 title=f"{company} Coverage"
             )
+            fig.update_traces(
+                hovertemplate="<b>%{properties.name}</b> - %{customdata[1]}<extra></extra>"
+            )
 
             locations = atc_locations[company]
+            locations['hover_text'] = locations['name'] + '<br>' + locations['comments']
             fig.add_trace(
                 go.Scattergeo(
                     lon=locations['lon'],
                     lat=locations['lat'],
                     hoverinfo='text',
-                    text=locations['name'],
+                    text=locations['hover_text'],
                     marker=dict(size=10, color='red'),
                     name=f"{company} ATC Cities"
                 )
             )
             regions = atc_regions[company]
+            regions['hover_text'] = regions['name'] + '<br>' + regions['comments']
             fig.add_trace(
                 go.Scattergeo(
                     lon=regions['lon'],
                     lat=regions['lat'],
                     hoverinfo='text',
-                    text=regions['name'],  # Text labels
+                    text=regions['hover_text'],  # Text labels
                     # mode='markers+text',  # Display both markers and text
                     marker=dict(
                         size=17.5,
@@ -255,12 +238,13 @@ def update_maps(coverage_selection, selected_companies, show_general_regions):
             )
             if 'show_regions' in show_general_regions:
                 general_region_locations = general_locations[company]
+                general_region_locations['hover_text'] = general_region_locations['name'] + '<br>' + general_region_locations['comments']
                 fig.add_trace(
                     go.Scattergeo(
                         lon=general_region_locations['lon'],
                         lat=general_region_locations['lat'],
                         hoverinfo='text',
-                        text=general_region_locations['name'],
+                        text=general_region_locations['hover_text'],
                         marker=dict(size=10, color='yellow'),
                         name=f"{company} General Regions"
                     )
@@ -287,9 +271,9 @@ def update_maps(coverage_selection, selected_companies, show_general_regions):
             cities_list = html.Ul([html.Li(city) for city in cities])
             regions_list = html.Ul([html.Li(region) for region in regions])
             general_list = html.Ul([html.Li(general) for general in generals])
-
+            map_id = json.dumps({'type': 'dynamic-map', 'index': company})
             combined_layout = html.Div([
-                dcc.Graph(figure=fig, style={'flex': '3', 'min-width': '300px'}),  # Map with flexible width
+                dcc.Graph(figure=fig, id=map_id, style={'flex': '3', 'min-width': '300px'}),  # Map with flexible width
                 html.Div([
                     html.H5(f"{company} ATC Cities:"),
                     cities_list,
@@ -311,7 +295,6 @@ def update_maps(coverage_selection, selected_companies, show_general_regions):
     [Input('company-selector', 'value')]
 )
 def update_link(selected_company):
-    # Default link if company is not found in the dictionary
     default_link = 'https://growthcommercial.sharepoint.com/:x:/s/GC/EYudFXChLs1HuMFH88MVMlEBJrZadQgTlA27aCspMkW5mA?e=v7cf66&nav=MTVfezU3ODMxQzJDLUE3QUItNEI5Qi1BQTdELTU3QUNFNzk4N0YyNX0'
     return default_link
 
@@ -327,13 +310,14 @@ def display_clicked_state_info(clickData, coverage_selection):
         return ""
 
     state_name = clickData['points'][0]['location']
-    state_info = data.loc[data['State'] == state_name, 'hover_text'].iloc[0]
-    oems_count = data.loc[data['State'] == state_name, 'OEMs_count'].iloc[0]
+    state_info = data.loc[data['State'] == state_name, 'hover_text_present'].iloc[0]
+    not_state_info = data.loc[data['State'] == state_name, 'hover_text_not_present'].iloc[0]
     return [
         html.Div(f"State: {state_name}"),
-        html.Div(f"Number of OEMs: {oems_count}"),
-        html.Div(f"OEMs present: {state_info}")
+        html.Div(f"OEMs present: {state_info}"),
+        html.Div(f"OEMs not present: {not_state_info}")
     ]
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)

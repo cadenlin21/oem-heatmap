@@ -109,10 +109,36 @@ app.layout = html.Div([
         id='maps-container',
         style={'width': '100vw', 'height': '80vh', 'display': 'flex', 'flexDirection': 'column'}
     ),
+    # html.Div([
+    # html.H4("Key:"),
+    # html.Ul([
+    #     html.Li("ATC City: Explanation of what an ATC City is."),
+    #     html.Li("ATC Region: Explanation of what an ATC Region is.")
+    # ])
+    # ],
+    # id='key-div',
+    # style={'display': 'none',
+    #        'position': 'absolute',
+    #        'top': '10px',
+    #        'right': '10px',
+    #        'backgroundColor': 'white',
+    #        'border': '1px solid black',
+    #        'padding': '10px',
+    #        'z-index': '1000'}),
     html.Div(id='clicked-state-info', style={'fontSize': 20, 'marginTop': 20, 'textAlign': 'left'}),
     html.Div(id='hidden-click-data', style={'display': 'none'})
 ])
 
+
+# @app.callback(
+#     Output('key-div', 'style'),
+#     [Input('coverage-selection', 'value')]
+# )
+# def toggle_key_visibility(coverage_selection):
+#     if coverage_selection == 'individual':
+#         return {'position': 'absolute', 'top': '10px', 'right': '10px', 'backgroundColor': 'white', 'border': '1px solid black', 'padding': '10px', 'z-index': '1000'}
+#     else:
+#         return {'display': 'none'}
 
 
 

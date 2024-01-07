@@ -6,6 +6,69 @@ import urllib.request
 import dash
 from dash import html, dcc, Input, Output, ALL
 
+us_state_to_abbrev = {
+    "Alabama": "AL",
+    "Alaska": "AK",
+    "Arizona": "AZ",
+    "Arkansas": "AR",
+    "California": "CA",
+    "Colorado": "CO",
+    "Connecticut": "CT",
+    "Delaware": "DE",
+    "Florida": "FL",
+    "Georgia": "GA",
+    "Hawaii": "HI",
+    "Idaho": "ID",
+    "Illinois": "IL",
+    "Indiana": "IN",
+    "Iowa": "IA",
+    "Kansas": "KS",
+    "Kentucky": "KY",
+    "Louisiana": "LA",
+    "Maine": "ME",
+    "Maryland": "MD",
+    "Massachusetts": "MA",
+    "Michigan": "MI",
+    "Minnesota": "MN",
+    "Mississippi": "MS",
+    "Missouri": "MO",
+    "Montana": "MT",
+    "Nebraska": "NE",
+    "Nevada": "NV",
+    "New Hampshire": "NH",
+    "New Jersey": "NJ",
+    "New Mexico": "NM",
+    "New York": "NY",
+    "North Carolina": "NC",
+    "North Dakota": "ND",
+    "Ohio": "OH",
+    "Oklahoma": "OK",
+    "Oregon": "OR",
+    "Pennsylvania": "PA",
+    "Rhode Island": "RI",
+    "South Carolina": "SC",
+    "South Dakota": "SD",
+    "Tennessee": "TN",
+    "Texas": "TX",
+    "Utah": "UT",
+    "Vermont": "VT",
+    "Virginia": "VA",
+    "Washington": "WA",
+    "West Virginia": "WV",
+    "Wisconsin": "WI",
+    "Wyoming": "WY",
+    "District of Columbia": "DC",
+    "American Samoa": "AS",
+    "Guam": "GU",
+    "Northern Mariana Islands": "MP",
+    "Puerto Rico": "PR",
+    "United States Minor Outlying Islands": "UM",
+    "U.S. Virgin Islands": "VI",
+}
+
+# invert the dictionary
+abbrev_to_us_state = dict(map(reversed, us_state_to_abbrev.items()))
+
 company_links = {
     'McCain': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=ikMnZe&nav=MTVfezU3ODMxQzJDLUE3QUItNEI5Qi1BQTdELTU3QUNFNzk4N0YyNX0',
     'Econolite': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=IJf7JW&nav=MTVfezU0REFCQ0U2LTc3MDItNEUxMC1CQzNFLUM1MTY3QTI2QUVCM30',
@@ -92,11 +155,14 @@ app.layout = html.Div([
         value=[],
         style={'display': 'none'}  # Initially hidden
     ),
+    html.Div(
     dcc.Dropdown(
         id='company-selector',
         options=dropdown_options,
         multi=True,
-        style={'display': 'none'}  # Adjust the style as needed
+        style={'display': 'none'}  # Remove width setting here
+    ),
+    style={'width': '30%'}  # Set the width on the wrapper div
     ),
     html.A(
         id='qualitative-link',
@@ -109,36 +175,39 @@ app.layout = html.Div([
         id='maps-container',
         style={'width': '100vw', 'height': '80vh', 'display': 'flex', 'flexDirection': 'column'}
     ),
-    # html.Div([
-    # html.H4("Key:"),
-    # html.Ul([
-    #     html.Li("ATC City: Explanation of what an ATC City is."),
-    #     html.Li("ATC Region: Explanation of what an ATC Region is.")
-    # ])
-    # ],
-    # id='key-div',
-    # style={'display': 'none',
-    #        'position': 'absolute',
-    #        'top': '10px',
-    #        'right': '10px',
-    #        'backgroundColor': 'white',
-    #        'border': '1px solid black',
-    #        'padding': '10px',
-    #        'z-index': '1000'}),
+    html.Div([
+    html.Ul([
+        html.Li("Presence: Present if the OEM has some sort of presence in the state, such as a regional office or any traffic-related activity."),
+        html.Li("ATC city: A specific city where the OEM has recently deployed OEMs."),
+        html.Li("ATC region: A general region where the OEM has recently deployed OEMs."),
+        html.Li("General location: A specific city or general region where the OEM has targeted presence, though not necessarily ATC-related."),
+    ])
+    ],
+    id='key-div', style={
+        'display': 'none',
+        'position': 'absolute',
+        'top': '10px',
+        'right': '10px',
+        'backgroundColor': 'white',
+        'border': '1px solid black',
+        'padding': '100px',
+        'margin-bottom': '100px',  # Increased space below the key
+        'z-index': '1000'
+    }),
     html.Div(id='clicked-state-info', style={'fontSize': 20, 'marginTop': 20, 'textAlign': 'left'}),
     html.Div(id='hidden-click-data', style={'display': 'none'})
 ])
 
 
-# @app.callback(
-#     Output('key-div', 'style'),
-#     [Input('coverage-selection', 'value')]
-# )
-# def toggle_key_visibility(coverage_selection):
-#     if coverage_selection == 'individual':
-#         return {'position': 'absolute', 'top': '10px', 'right': '10px', 'backgroundColor': 'white', 'border': '1px solid black', 'padding': '10px', 'z-index': '1000'}
-#     else:
-#         return {'display': 'none'}
+@app.callback(
+    Output('key-div', 'style'),
+    [Input('coverage-selection', 'value')]
+)
+def toggle_key_visibility(coverage_selection):
+    if coverage_selection == 'individual' or coverage_selection == 'all':
+        return {'position': 'absolute', 'top': '10px', 'right': '10px', 'backgroundColor': 'white', 'border': '1px solid black', 'padding': '10px', 'z-index': '1000'}
+    else:
+        return {'display': 'none'}
 
 
 
@@ -229,42 +298,134 @@ def update_maps(coverage_selection, selected_companies, show_general_regions):
             )
 
             locations = atc_locations[company]
+            locations['city'] = ''
+            locations['state'] = ''
+            for index, row in locations.iterrows():
+                parts = row['name'].split(', ')
+                if len(parts) == 2:
+                    city, state = parts
+                    if state in abbrev_to_us_state:
+                        state = abbrev_to_us_state[state]
+                    locations.at[index, 'city'] = city
+                    locations.at[index, 'state'] = state
+                    locations.at[index, 'formatted_location'] = f"{state}: {city}"
+                elif len(parts) == 1:
+                    city = parts[0]
+                    state = 'Unknown'  # or any default value
+                    locations.at[index, 'city'] = city
+                    locations.at[index, 'state'] = state
+                    locations.at[index, 'formatted_location'] = f"{city}"
+
+            sorted_locations = locations.sort_values(by=['state', 'city'])
+            cities_html_list = html.Ul([html.Li(loc) for loc in sorted_locations['formatted_location']])
             locations['hover_text'] = locations['name'] + '<br>' + locations['comments']
-            fig.add_trace(
-                go.Scattergeo(
-                    lon=locations['lon'],
-                    lat=locations['lat'],
-                    hoverinfo='text',
-                    text=locations['hover_text'],
-                    marker=dict(size=10, color='red'),
-                    name=f"{company} ATC Cities"
+            if company == 'McCain':
+                fig.add_trace(
+                    go.Scattergeo(
+                        lon=locations['lon'],
+                        lat=locations['lat'],
+                        hoverinfo='text',
+                        text=locations['hover_text'],
+                        marker=dict(size=7, color='red'),
+                        name=f"{company} ATC Cities"
+                    )
                 )
-            )
+            else:
+                fig.add_trace(
+                    go.Scattergeo(
+                        lon=locations['lon'],
+                        lat=locations['lat'],
+                        hoverinfo='text',
+                        text=locations['hover_text'],
+                        marker=dict(size=10, color='red'),
+                        name=f"{company} ATC Cities"
+                    )
+                )
+
             regions = atc_regions[company]
+            regions['city'] = ''
+            regions['state'] = ''
+            for index, row in regions.iterrows():
+                parts = row['name'].split(', ')
+                if len(parts) == 2:
+                    city, state = parts
+                    if state in abbrev_to_us_state:
+                        state = abbrev_to_us_state[state]
+                    regions.at[index, 'city'] = city
+                    regions.at[index, 'state'] = state
+                    regions.at[index, 'formatted_location'] = f"{state}: {city}"
+                elif len(parts) == 1:
+                    city = parts[0]
+                    state = 'Unknown'  # or any default value
+                    regions.at[index, 'city'] = city
+                    regions.at[index, 'state'] = state
+                    regions.at[index, 'formatted_location'] = f"{city}"
+
+            sorted_regions = regions.sort_values(by=['state', 'city'])
+            if sorted_regions.empty:
+                regions_html_list = None
+            else:
+                regions_html_list = html.Ul([html.Li(loc) for loc in sorted_regions['formatted_location']])
             regions['hover_text'] = regions['name'] + '<br>' + regions['comments']
-            fig.add_trace(
-                go.Scattergeo(
-                    lon=regions['lon'],
-                    lat=regions['lat'],
-                    hoverinfo='text',
-                    text=regions['hover_text'],  # Text labels
-                    # mode='markers+text',  # Display both markers and text
-                    marker=dict(
-                        size=17.5,
-                        color='LightCoral',
-                        opacity=0.7
-                    ),
-                    # textposition='top center',  # Position of the text
-                    # line=dict(  # Line properties
-                    #     width=1,
-                    #     color='LightCoral',
-                    # ),
-                    name=f"{company} ATC Regions"
+            if company == 'McCain':
+                fig.add_trace(
+                    go.Scattergeo(
+                        lon=regions['lon'],
+                        lat=regions['lat'],
+                        hoverinfo='text',
+                        text=regions['hover_text'],  # Text labels
+                        marker=dict(
+                            size=13.5,
+                            color='LightCoral',
+                            opacity=0.7
+                        ),
+                        name=f"{company} ATC Regions"
+                    )
                 )
-            )
+            else:
+                fig.add_trace(
+                    go.Scattergeo(
+                        lon=regions['lon'],
+                        lat=regions['lat'],
+                        hoverinfo='text',
+                        text=regions['hover_text'],  # Text labels
+                        marker=dict(
+                            size=17.5,
+                            color='LightCoral',
+                            opacity=0.7
+                        ),
+                        name=f"{company} ATC Regions"
+                    )
+                )
+
+            general_region_locations = general_locations[company]
+            general_region_locations['city'] = ''
+            general_region_locations['state'] = ''
+            general_region_locations['formatted_location'] = ''
+            for index, row in general_region_locations.iterrows():
+                parts = row['name'].split(', ')
+                if len(parts) == 2:
+                    city, state = parts
+                    if state in abbrev_to_us_state:
+                        state = abbrev_to_us_state[state]
+                    general_region_locations.at[index, 'city'] = city
+                    general_region_locations.at[index, 'state'] = state
+                    general_region_locations.at[index, 'formatted_location'] = f"{state}: {city}"
+                elif len(parts) == 1:
+                    city = parts[0]
+                    state = 'Unknown'  # or any default value
+                    general_region_locations.at[index, 'city'] = city
+                    general_region_locations.at[index, 'state'] = state
+                    general_region_locations.at[index, 'formatted_location'] = f"{city}"
+
+            sorted_general_region_locations = general_region_locations.sort_values(by=['state', 'city'])
+            if not sorted_general_region_locations.empty:
+                general_regions_html_list = html.Ul([html.Li(loc) for loc in sorted_general_region_locations['formatted_location']])
+            else:
+                general_regions_html_list = None
+            general_region_locations['hover_text'] = general_region_locations['name'] + '<br>' + general_region_locations['comments']
+
             if 'show_regions' in show_general_regions:
-                general_region_locations = general_locations[company]
-                general_region_locations['hover_text'] = general_region_locations['name'] + '<br>' + general_region_locations['comments']
                 fig.add_trace(
                     go.Scattergeo(
                         lon=general_region_locations['lon'],
@@ -275,6 +436,7 @@ def update_maps(coverage_selection, selected_companies, show_general_regions):
                         name=f"{company} General Regions"
                     )
                 )
+
             fig.update_geos(
                 center=dict(lat=39.8283, lon=-98.5795),
                 lataxis_range=[15, 50],  # Adjust as needed
@@ -288,25 +450,16 @@ def update_maps(coverage_selection, selected_companies, show_general_regions):
             )
             # maps.append(fig)
 
-            cities = atc_locations.get(company, [])
-            cities = cities['name']
-            regions = atc_regions.get(company, [])
-            regions = regions['name']
-            generals = general_locations.get(company, [])
-            generals = generals['name']
-            cities_list = html.Ul([html.Li(city) for city in cities])
-            regions_list = html.Ul([html.Li(region) for region in regions])
-            general_list = html.Ul([html.Li(general) for general in generals])
             map_id = json.dumps({'type': 'dynamic-map', 'index': company})
             combined_layout = html.Div([
                 dcc.Graph(figure=fig, id=map_id, style={'flex': '3', 'min-width': '300px'}),  # Map with flexible width
                 html.Div([
                     html.H5(f"{company} ATC Cities:"),
-                    cities_list,
+                    cities_html_list,
                     html.H5(f"{company} ATC Regions:"),
-                    regions_list,
+                    regions_html_list,
                     html.H5(f"{company} General Locations:"),
-                    general_list
+                    general_regions_html_list
                 ], style={'flex': '1', 'min-width': '200px', 'max-height': '400px', 'overflow-y': 'auto'})  # Scroll for long lists
             ], style={'display': 'flex', 'width': '100%', 'align-items': 'stretch', 'margin-bottom': '20px'})
 

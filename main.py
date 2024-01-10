@@ -77,7 +77,7 @@ company_links = {
     'Temple': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=uD3PcH&nav=MTVfe0M2MDNBQkJBLUVCQkItNDVDOS1BQkExLTk4Nzc3QjFBMDVDRH0',
     'Oriux': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=H80W4B&nav=MTVfezNBMzgzM0FELUU2OTgtNDc3NS04QzcxLTQ1N0JDQTI4MkQ2MX0',
     'Western Systems': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=6CNDQo&nav=MTVfezQ1NjYzNEQ1LUU4MjQtNDdBQy05MUM5LTFENkE5QTRBRTFFMn0',
-    'Mobotrex': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=2pwIcr&nav=MTVfe0M1QUIyNEZCLTIyMTctNEZDNS05NEIwLTgxQTMyNzg0OUM3RX0'
+    'MoboTrex': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=2pwIcr&nav=MTVfe0M1QUIyNEZCLTIyMTctNEZDNS05NEIwLTgxQTMyNzg0OUM3RX0'
 }
 
 # Load your data
@@ -110,7 +110,7 @@ atc_locations = {
     'Cubic': pd.read_excel('heatmap_data.xlsx', sheet_name="Cubic"),
     'Temple': pd.read_excel('heatmap_data.xlsx', sheet_name="Temple"),
     'Oriux': pd.read_excel('heatmap_data.xlsx', sheet_name="Oriux"),
-    'Mobotrex': pd.read_excel('heatmap_data.xlsx', sheet_name="Mobotrex"),
+    'MoboTrex': pd.read_excel('heatmap_data.xlsx', sheet_name="MoboTrex"),
 }
 
 atc_regions = {
@@ -121,7 +121,7 @@ atc_regions = {
     'Cubic': pd.read_excel('heatmap_regions.xlsx', sheet_name="Cubic"),
     'Temple': pd.read_excel('heatmap_regions.xlsx', sheet_name="Temple"),
     'Oriux': pd.read_excel('heatmap_regions.xlsx', sheet_name="Oriux"),
-    'Mobotrex': pd.read_excel('heatmap_regions.xlsx', sheet_name="Mobotrex"),
+    'MoboTrex': pd.read_excel('heatmap_regions.xlsx', sheet_name="MoboTrex"),
 }
 
 general_locations = {
@@ -132,9 +132,9 @@ general_locations = {
     'Cubic': pd.read_excel('general_cities.xlsx', sheet_name="Cubic"),
     'Temple': pd.read_excel('general_cities.xlsx', sheet_name="Temple"),
     'Oriux': pd.read_excel('general_cities.xlsx', sheet_name="Oriux"),
-    'Mobotrex': pd.read_excel('general_cities.xlsx', sheet_name="Mobotrex"),
+    'MoboTrex': pd.read_excel('general_cities.xlsx', sheet_name="MoboTrex"),
 }
-oem_list = ['McCain', 'Econolite', 'Q-Free', 'Cubic', 'Temple', 'Oriux', 'Western Systems', 'Mobotrex']
+oem_list = ['McCain', 'Econolite', 'Q-Free', 'Cubic', 'Temple', 'Oriux', 'Western Systems', 'MoboTrex']
 dropdown_options = [{'label': f'{i+1}. {oem}', 'value': oem} for i, oem in enumerate(oem_list)]
 app.layout = html.Div([
     dcc.RadioItems(
@@ -176,11 +176,23 @@ app.layout = html.Div([
         style={'width': '100vw', 'height': '80vh', 'display': 'flex', 'flexDirection': 'column'}
     ),
     html.Div([
-    html.Ul([
-        html.Li("Presence: Present if the OEM has some sort of presence in the state, such as a regional office or any traffic-related activity."),
-        html.Li("ATC city: A specific city where the OEM has recently deployed OEMs."),
-        html.Li("ATC region: A general region where the OEM has recently deployed OEMs."),
-        html.Li("General location: A specific city or general region where the OEM has targeted presence, though not necessarily ATC-related."),
+        html.Ul([
+            html.Li([
+                html.Span(style={'height': '10px', 'width': '10px', 'background-color': 'lightblue', 'border-radius': '0%', 'display': 'inline-block', 'margin-right': '5px'}),
+                "Presence: Present if the OEM has some sort of presence in the state, such as a regional office or any traffic-related activity."
+            ], style={'list-style-type': 'none'}),
+            html.Li([
+                html.Span(style={'height': '10px', 'width': '10px', 'background-color': 'red', 'border-radius': '50%', 'display': 'inline-block', 'margin-right': '5px'}),
+                "ATC city: A specific city where the OEM has recently deployed OEMs."
+            ], style={'list-style-type': 'none'}),
+            html.Li([
+                html.Span(style={'height': '15px', 'width': '15px', 'background-color': 'red', 'opacity': '50%','border-radius': '50%', 'display': 'inline-block', 'margin-right': '5px'}),
+                "ATC city: A specific city where the OEM has recently deployed OEMs.""ATC region: A general region where the OEM has recently deployed OEMs."
+            ], style={'list-style-type': 'none'}),
+            html.Li([
+                html.Span(style={'height': '10px', 'width': '10px', 'background-color': 'orange', 'border-radius': '50%', 'display': 'inline-block', 'margin-right': '5px'}),
+                "General location: A specific city or general region where the OEM has targeted presence, though not necessarily ATC-related."
+            ], style={'list-style-type': 'none'}),
     ])
     ],
     id='key-div', style={
@@ -267,7 +279,7 @@ def update_maps(coverage_selection, selected_companies, show_general_regions):
         return [dcc.Graph(figure=fig, id='total-coverage-map')]
     else:
         if coverage_selection == 'all':
-            selected_companies = ['McCain', 'Econolite', 'Cubic', 'Mobotrex', 'Q-Free', 'Western Systems', 'Temple', 'Oriux']
+            selected_companies = ['McCain', 'Econolite', 'Cubic', 'MoboTrex', 'Q-Free', 'Western Systems', 'Temple', 'Oriux']
         if not selected_companies or not selected_companies[0]:
             empty_fig = go.Figure(go.Scattergeo())
             empty_fig.update_layout(
@@ -432,7 +444,7 @@ def update_maps(coverage_selection, selected_companies, show_general_regions):
                         lat=general_region_locations['lat'],
                         hoverinfo='text',
                         text=general_region_locations['hover_text'],
-                        marker=dict(size=10, color='yellow'),
+                        marker=dict(size=10, color='orange'),
                         name=f"{company} General Regions"
                     )
                 )

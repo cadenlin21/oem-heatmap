@@ -6,6 +6,7 @@ import urllib.request
 import dash
 from dash import html, dcc, Input, Output, ALL
 
+# mapping from states to abbreivation
 us_state_to_abbrev = {
     "Alabama": "AL",
     "Alaska": "AK",
@@ -66,42 +67,9 @@ us_state_to_abbrev = {
     "U.S. Virgin Islands": "VI",
 }
 
-# invert the dictionary
+# mapping from abbreviations to states
 abbrev_to_us_state = dict(map(reversed, us_state_to_abbrev.items()))
 
-company_links = {
-    'McCain': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=ikMnZe&nav=MTVfezU3ODMxQzJDLUE3QUItNEI5Qi1BQTdELTU3QUNFNzk4N0YyNX0',
-    'Econolite': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=IJf7JW&nav=MTVfezU0REFCQ0U2LTc3MDItNEUxMC1CQzNFLUM1MTY3QTI2QUVCM30',
-    'Q-Free': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=QyoK6Z&nav=MTVfezc3NzQxMTY5LTVDRDEtNDlERC1CNEYzLTJGMzFCNjA5QTkxNn0',
-    'Cubic': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=0fjmuN&nav=MTVfe0M2Q0Y1OUFELTQ2RkItNDc3Ny05NzZGLTA2OERFQTg0RUU1MH0',
-    'Temple': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=uD3PcH&nav=MTVfe0M2MDNBQkJBLUVCQkItNDVDOS1BQkExLTk4Nzc3QjFBMDVDRH0',
-    'Oriux': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=H80W4B&nav=MTVfezNBMzgzM0FELUU2OTgtNDc3NS04QzcxLTQ1N0JDQTI4MkQ2MX0',
-    'Western Systems': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=6CNDQo&nav=MTVfezQ1NjYzNEQ1LUU4MjQtNDdBQy05MUM5LTFENkE5QTRBRTFFMn0',
-    'MoboTrex': 'https://growthcommercial.sharepoint.com/:x:/r/sites/GC/Shared%20Documents/Clients/Synapse%20ITS/Benchmarking/Qualitative%20Companion%20for%20Heatmap.xlsx?d=w70159d8b2ea147cdb8c147f3c3153251&csf=1&web=1&e=2pwIcr&nav=MTVfe0M1QUIyNEZCLTIyMTctNEZDNS05NEIwLTgxQTMyNzg0OUM3RX0'
-}
-
-# Load your data
-data = pd.read_excel('heatmap_data.xlsx', sheet_name='Total')
-
-
-def get_companies_info(row):
-    companies_present = [company for company in company_links.keys() if row[company] == 1]
-    companies_not_present = [company for company in company_links.keys() if row[company] != 1]
-
-    companies_present_str = ', '.join(companies_present) if companies_present else 'None'
-    companies_not_present_str = ', '.join(companies_not_present) if companies_not_present else 'None'
-
-    return companies_present_str, companies_not_present_str
-
-data[['hover_text_present', 'hover_text_not_present']] = data.apply(get_companies_info, axis=1, result_type='expand')
-url = "https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json"
-with urllib.request.urlopen(url) as response:
-    states_geojson = json.loads(response.read())
-
-app = dash.Dash(__name__,
-           suppress_callback_exceptions=True)
-
-server = app.server
 atc_locations = {
     'Western Systems': pd.read_excel('heatmap_data.xlsx', sheet_name='Western Systems'),
     'McCain': pd.read_excel('heatmap_data.xlsx', sheet_name="McCain"),
@@ -134,8 +102,43 @@ general_locations = {
     'Oriux': pd.read_excel('general_cities.xlsx', sheet_name="Oriux"),
     'MoboTrex': pd.read_excel('general_cities.xlsx', sheet_name="MoboTrex"),
 }
-oem_list = ['McCain', 'Econolite', 'Q-Free', 'Cubic', 'Temple', 'Oriux', 'Western Systems', 'MoboTrex']
-dropdown_options = [{'label': f'{i+1}. {oem}', 'value': oem} for i, oem in enumerate(oem_list)]
+
+
+offices = {
+    'Western Systems': pd.read_excel('heatmap_offices.xlsx', sheet_name='Western Systems'),
+    'McCain': pd.read_excel('heatmap_offices.xlsx', sheet_name="McCain"),
+    'Econolite': pd.read_excel('heatmap_offices.xlsx', sheet_name="Econolite"),
+    'Q-Free': pd.read_excel('heatmap_offices.xlsx', sheet_name="Q-Free"),
+    'Cubic': pd.read_excel('heatmap_offices.xlsx', sheet_name="Cubic"),
+    'Temple': pd.read_excel('heatmap_offices.xlsx', sheet_name="Temple"),
+    'Oriux': pd.read_excel('heatmap_offices.xlsx', sheet_name="Oriux"),
+    'MoboTrex': pd.read_excel('heatmap_offices.xlsx', sheet_name="MoboTrex"),
+}
+
+# Load your data
+data = pd.read_excel('heatmap_data.xlsx', sheet_name='Total')
+
+def get_companies_info(row):
+    companies_present = [company for company in offices.keys() if row[company] == 1]
+    companies_not_present = [company for company in offices.keys() if row[company] != 1]
+
+    companies_present_str = ', '.join(companies_present) if companies_present else 'None'
+    companies_not_present_str = ', '.join(companies_not_present) if companies_not_present else 'None'
+
+    return companies_present_str, companies_not_present_str
+
+data[['hover_text_present', 'hover_text_not_present']] = data.apply(get_companies_info, axis=1, result_type='expand')
+url = "https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json"
+with urllib.request.urlopen(url) as response:
+    states_geojson = json.loads(response.read())
+
+app = dash.Dash(__name__,
+           suppress_callback_exceptions=True)
+
+server = app.server
+
+
+dropdown_options = [{'label': f'{i+1}. {oem}', 'value': oem} for i, oem in enumerate(offices.keys())]
 app.layout = html.Div([
     dcc.RadioItems(
         id='coverage-selection',
@@ -410,6 +413,7 @@ def update_maps(coverage_selection, selected_companies, show_general_regions):
                     )
                 )
 
+
             general_region_locations = general_locations[company]
             general_region_locations['city'] = ''
             general_region_locations['state'] = ''
@@ -449,6 +453,49 @@ def update_maps(coverage_selection, selected_companies, show_general_regions):
                     )
                 )
 
+            office_locations = offices[company]
+            office_locations['city'] = ''
+            office_locations['state'] = ''
+            office_locations['formatted_location'] = ''
+            for index, row in office_locations.iterrows():
+                parts = row['name'].split(', ')
+                if len(parts) == 2:
+                    city, state = parts
+                    if state in abbrev_to_us_state:
+                        state = abbrev_to_us_state[state]
+                    office_locations.at[index, 'city'] = city
+                    office_locations.at[index, 'state'] = state
+                    office_locations.at[index, 'formatted_location'] = f"{state}: {city}"
+                elif len(parts) == 1:
+                    city = parts[0]
+                    state = 'Unknown'  # or any default value
+                    office_locations.at[index, 'city'] = city
+                    office_locations.at[index, 'state'] = state
+                    office_locations.at[index, 'formatted_location'] = f"{city}"
+
+            sorted_office_locations = office_locations.sort_values(by=['state', 'city'])
+            if not sorted_office_locations.empty:
+                sorted_office_list = html.Ul(
+                    [html.Li(loc) for loc in sorted_office_locations['formatted_location']])
+            else:
+                sorted_office_list = None
+            sorted_office_locations['hover_text'] = sorted_office_locations['name'] + '<br>' + \
+                                                    sorted_office_locations['comments']
+            fig.add_trace(
+                go.Scattergeo(
+                    lon=sorted_office_locations['lon'],
+                    lat=sorted_office_locations['lat'],
+                    hoverinfo='text',
+                    text=sorted_office_locations['hover_text'],  # Text labels
+                    marker=dict(
+                        size=10,
+                        color='Purple',
+                        opacity=1
+                    ),
+                    name=f"{company} Offices"
+                )
+            )
+
             fig.update_geos(
                 center=dict(lat=39.8283, lon=-98.5795),
                 lataxis_range=[15, 50],  # Adjust as needed
@@ -471,14 +518,15 @@ def update_maps(coverage_selection, selected_companies, show_general_regions):
                     html.H5(f"{company} ATC Regions:"),
                     regions_html_list,
                     html.H5(f"{company} General Locations:"),
-                    general_regions_html_list
+                    general_regions_html_list,
+                    html.H5(f"{company} Offices:"),
+                    sorted_office_list
                 ], style={'flex': '1', 'min-width': '200px', 'max-height': '400px', 'overflow-y': 'auto'})  # Scroll for long lists
             ], style={'display': 'flex', 'width': '100%', 'align-items': 'stretch', 'margin-bottom': '20px'})
 
             maps.append(combined_layout)
 
     return maps
-    # return [dcc.Graph(figure=fig, id='total-coverage-map') for fig in maps]
 
 
 @app.callback(

@@ -568,7 +568,7 @@ import oem_heatmap
 import general_heatmap
 
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
-
+server = app.server
 app.layout = html.Div([
     dcc.Dropdown(
         id='heatmap-selection',

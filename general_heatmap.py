@@ -2,6 +2,11 @@
 import plotly.express as px
 from dash import html, dcc, Input, Output
 import pandas as pd
+import json
+
+with open('combined-us-canada-with-states-provinces_793.geojson') as f:
+    combined_geojson = json.load(f)
+
 
 # Define the layout for the General heatmap
 def layout():
@@ -11,9 +16,8 @@ def layout():
             options=[
                 {'label': 'GDP', 'value': 'gdp'},
                 {'label': 'Population', 'value': 'population'},
-                {'label': 'Growth Rate', 'value': 'growth_rate'},
-                {'label': 'Median Income', 'value': 'median_income'},
-                {'label': 'Number of Signalized Intersections', 'value': 'signalized_intersections'}
+                {'label': 'Median Income', 'value': 'income'},
+                {'label': 'DOT Spend Per Capita', 'value': 'dot'}
             ],
             value='gdp',  # Default value
             style={'width': '50%', 'margin': '10px'}
@@ -22,20 +26,17 @@ def layout():
     ])
 
 
-# Function to generate sample GDP data
-def generate_sample_gdp_data():
-    # Sample GDP data for US states
-    sample_data = {
-        'State': ['CA', 'TX', 'NY', 'FL', 'IL'],
-        'GDP': [3000000, 1800000, 1500000, 1000000, 800000]  # Sample GDP values
-    }
-    return pd.DataFrame(sample_data)
+df = pd.read_excel('Demographic info for all 50 states & Canada provinces.xlsx')
+gdp = df[['State/Province', 'GDP']]
+pop = df[['State/Province', 'Population']]
+inc = df[['State/Province', 'Median Income']]
+dot = df[['State/Province', 'DOT Funds Per Capita']]
 
-def generate_population_data():
-    # Sample GDP data for US states
+def generate_sample_data():
+    # Sample data for Canadian provinces
     sample_data = {
-        'State': ['CA', 'TX', 'NY', 'FL', 'IL'],
-        'Population': [3000000, 1800000, 1500000, 1000000, 800000]  # Sample GDP values
+        'State/Province': ['Ontario', 'Quebec', 'British Columbia', 'Alberta', 'Manitoba', 'California'],
+        'Data': [1000, 800, 600, 400, 200, 500]  # Sample data values
     }
     return pd.DataFrame(sample_data)
 
@@ -45,34 +46,57 @@ def register_callbacks(app):
         Output('general-heatmap', 'figure'),
         [Input('general-data-selection', 'value')]
     )
+
     def update_general_heatmap(selected_data):
         if selected_data == 'gdp':
-            df = generate_sample_gdp_data()
+            df = gdp
             fig = px.choropleth(
                 df,
-                locations='State',
-                locationmode='USA-states',
+                geojson=combined_geojson,
+                locations='State/Province',
+                featureidkey="properties.name",
                 color='GDP',
-                scope="usa",
+                scope="north america",
                 color_continuous_scale='Blues',
-                title='US GDP by State'
+                title='GDP by State'
             )
             return fig
         elif selected_data == 'population':
-            df = generate_population_data()
+            df = pop
             fig = px.choropleth(
                 df,
-                locations='State',
-                locationmode='USA-states',
+                geojson=combined_geojson,
+                locations='State/Province',
+                featureidkey="properties.name",
                 color='Population',
-                scope="usa",
+                scope="north america",
                 color_continuous_scale='Blues',
-                title='US Population by State'
+                title='Population by State'
             )
             return fig
-        elif selected_data == 'growth_rate':
-            return px.choropleth()
-        elif selected_data == 'median_income':
-            return px.choropleth()
-        elif selected_data == 'signalized_intersections':
-            return px.choropleth()
+        elif selected_data == 'income':
+            df = inc
+            fig = px.choropleth(
+                df,
+                geojson=combined_geojson,
+                locations='State/Province',
+                featureidkey="properties.name",
+                color='Median Income',
+                scope="north america",
+                color_continuous_scale='Blues',
+                title='Population by State'
+            )
+            return fig
+        elif selected_data == 'dot':
+            df = dot
+            fig = px.choropleth(
+                df,
+                geojson=combined_geojson,
+                locations='State/Province',
+                featureidkey="properties.name",
+                color='DOT Funds Per Capita',
+                scope="north america",
+                color_continuous_scale='Blues',
+                title='Population by State'
+            )
+            return fig

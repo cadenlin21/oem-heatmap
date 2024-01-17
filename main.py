@@ -574,7 +574,7 @@ app.layout = html.Div([
         id='heatmap-selection',
         options=[
             {'label': 'OEM Heatmap', 'value': 'oem'},
-            {'label': 'General Heatmap', 'value': 'general'}
+            {'label': 'Demographic Heatmap', 'value': 'dem'},
         ],
         value='oem',
         style={'width': '50%', 'margin': '10px'}
@@ -589,7 +589,7 @@ app.layout = html.Div([
 def update_page_layout(selected_heatmap):
     if selected_heatmap == 'oem':
         return oem_heatmap.layout()
-    elif selected_heatmap == 'general':
+    elif selected_heatmap == 'dem':
         return general_heatmap.layout()
 
 # Register callbacks for both OEM and General heatmaps

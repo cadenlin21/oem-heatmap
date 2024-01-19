@@ -1,5 +1,6 @@
 # general_heatmap.py
 import plotly.express as px
+import plotly.graph_objects as go
 from dash import html, dcc, Input, Output
 import pandas as pd
 import json
@@ -8,6 +9,68 @@ import numpy as np
 with open('combined-us-canada-with-states-provinces_793.geojson') as f:
     combined_geojson = json.load(f)
 
+us_state_to_abbrev = {
+    "Alabama": "AL",
+    "Alaska": "AK",
+    "Arizona": "AZ",
+    "Arkansas": "AR",
+    "California": "CA",
+    "Colorado": "CO",
+    "Connecticut": "CT",
+    "Delaware": "DE",
+    "Florida": "FL",
+    "Georgia": "GA",
+    "Hawaii": "HI",
+    "Idaho": "ID",
+    "Illinois": "IL",
+    "Indiana": "IN",
+    "Iowa": "IA",
+    "Kansas": "KS",
+    "Kentucky": "KY",
+    "Louisiana": "LA",
+    "Maine": "ME",
+    "Maryland": "MD",
+    "Massachusetts": "MA",
+    "Michigan": "MI",
+    "Minnesota": "MN",
+    "Mississippi": "MS",
+    "Missouri": "MO",
+    "Montana": "MT",
+    "Nebraska": "NE",
+    "Nevada": "NV",
+    "New Hampshire": "NH",
+    "New Jersey": "NJ",
+    "New Mexico": "NM",
+    "New York": "NY",
+    "North Carolina": "NC",
+    "North Dakota": "ND",
+    "Ohio": "OH",
+    "Oklahoma": "OK",
+    "Oregon": "OR",
+    "Pennsylvania": "PA",
+    "Rhode Island": "RI",
+    "South Carolina": "SC",
+    "South Dakota": "SD",
+    "Tennessee": "TN",
+    "Texas": "TX",
+    "Utah": "UT",
+    "Vermont": "VT",
+    "Virginia": "VA",
+    "Washington": "WA",
+    "West Virginia": "WV",
+    "Wisconsin": "WI",
+    "Wyoming": "WY",
+    "District of Columbia": "DC",
+    "American Samoa": "AS",
+    "Guam": "GU",
+    "Northern Mariana Islands": "MP",
+    "Puerto Rico": "PR",
+    "United States Minor Outlying Islands": "UM",
+    "U.S. Virgin Islands": "VI",
+}
+capitals = pd.read_csv('us-state-capitals.csv')
+capitals['state'] = capitals['name'].map(us_state_to_abbrev)
+capitals['hover_text'] = capitals['description'] + ', ' + capitals['state']
 
 # Define the layout for the General heatmap
 def layout():
@@ -86,7 +149,6 @@ def register_callbacks(app):
                 autosize=True,
                 margin=dict(l=35, r=35, t=35, b=35)
             )
-            return fig
         elif selected_data == 'population':
             df = pop
             df['log_pop'] = np.log2(df['Population'])
@@ -118,7 +180,6 @@ def register_callbacks(app):
                 autosize=True,
                 margin=dict(l=35, r=35, t=35, b=35)
             )
-            return fig
         elif selected_data == 'income':
             df = inc
             df['rounded'] = round(df['Median Income'])
@@ -142,7 +203,6 @@ def register_callbacks(app):
                 autosize=True,
                 margin=dict(l=35, r=35, t=35, b=35)
             )
-            return fig
         elif selected_data == 'dot':
             df = dot
             df['log_dot'] = np.log10(df['DOT Funds Per Capita'])
@@ -174,7 +234,6 @@ def register_callbacks(app):
                 autosize=True,
                 margin=dict(l=35, r=35, t=35, b=35)
             )
-            return fig
         elif selected_data == 'growth':
             df = growth
             df['rounded'] = round(df['GDP Growth Rate'] * 100, 1)
@@ -205,4 +264,19 @@ def register_callbacks(app):
                 autosize=True,
                 margin=dict(l=35, r=35, t=35, b=35)
             )
-            return fig
+        fig.update_geos(
+            center=dict(lat=39.8283, lon=-98.5795),
+            # lataxis_range=[15, 50],  # Adjust as needed
+            # lonaxis_range=[-125, -75]  # Adjust as needed
+        )
+        fig.add_trace(
+            go.Scattergeo(
+                lon=capitals['lon'],
+                lat=capitals['lat'],
+                hoverinfo='text',
+                text=capitals['hover_text'],
+                marker=dict(size=7, color='red'),
+                name="State Capitals"
+            )
+        )
+        return fig

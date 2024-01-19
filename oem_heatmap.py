@@ -115,6 +115,17 @@ offices = {
     'MoboTrex': pd.read_excel('heatmap_offices.xlsx', sheet_name="MoboTrex"),
 }
 
+headquarters = {
+    'Western Systems': pd.read_excel('heatmap_hq.xlsx', sheet_name='Western Systems'),
+    'McCain': pd.read_excel('heatmap_hq.xlsx', sheet_name="McCain"),
+    'Econolite': pd.read_excel('heatmap_hq.xlsx', sheet_name="Econolite"),
+    'Q-Free': pd.read_excel('heatmap_hq.xlsx', sheet_name="Q-Free"),
+    'Cubic': pd.read_excel('heatmap_hq.xlsx', sheet_name="Cubic"),
+    'Temple': pd.read_excel('heatmap_hq.xlsx', sheet_name="Temple"),
+    'Oriux': pd.read_excel('heatmap_hq.xlsx', sheet_name="Oriux"),
+    'MoboTrex': pd.read_excel('heatmap_hq.xlsx', sheet_name="MoboTrex"),
+}
+
 # Load your data
 data = pd.read_excel('heatmap_data.xlsx', sheet_name='Total')
 
@@ -193,8 +204,20 @@ def layout():
                 ], style={'list-style-type': 'none'}),
                 html.Li([
                     html.Span(style={'height': '10px', 'width': '10px', 'background-color': 'orange', 'border-radius': '50%', 'display': 'inline-block', 'margin-right': '5px'}),
-                    "General location: A specific city or general region where the OEM has targeted presence, though not necessarily ATC-related."
+                    "General region: A specific city or general region where the OEM has targeted presence, though not necessarily ATC-related."
                 ], style={'list-style-type': 'none'}),
+                html.Li([
+                    html.Span(
+                        style={'height': '10px', 'width': '10px', 'background-color': 'purple', 'border-radius': '50%',
+                               'display': 'inline-block', 'margin-right': '5px'}),
+                    "Office: An office or manufacturing facility for the OEM."
+                ], style={'list-style-type': 'none'}),
+                html.Li([
+                    html.Span(
+                        style={'height': '15px', 'width': '15px', 'background-color': 'purple', 'border-radius': '50%',
+                               'display': 'inline-block', 'margin-right': '5px'}),
+                    "Headquarters: OEM headquarters."
+                ], style={'list-style-type': 'none'})
         ])
         ],
         id='key-div', style={
@@ -315,6 +338,7 @@ def register_callbacks(app):
                 locations = atc_locations[company]
                 locations['city'] = ''
                 locations['state'] = ''
+                locations['temp'] = locations['comments'].str.split('-')
                 for index, row in locations.iterrows():
                     parts = row['name'].split(', ')
                     if len(parts) == 2:
@@ -330,6 +354,8 @@ def register_callbacks(app):
                         locations.at[index, 'city'] = city
                         locations.at[index, 'state'] = state
                         locations.at[index, 'formatted_location'] = f"{city}"
+                    if len(locations.at[index, 'temp']) > 1:
+                        locations.at[index, 'formatted_location'] += ' - ' + locations.at[index, 'temp'][1]
 
                 sorted_locations = locations.sort_values(by=['state', 'city'])
                 cities_html_list = html.Ul([html.Li(loc) for loc in sorted_locations['formatted_location']])
@@ -360,6 +386,7 @@ def register_callbacks(app):
                 regions = atc_regions[company]
                 regions['city'] = ''
                 regions['state'] = ''
+                regions['temp'] = regions['comments'].str.split('-')
                 for index, row in regions.iterrows():
                     parts = row['name'].split(', ')
                     if len(parts) == 2:
@@ -375,6 +402,8 @@ def register_callbacks(app):
                         regions.at[index, 'city'] = city
                         regions.at[index, 'state'] = state
                         regions.at[index, 'formatted_location'] = f"{city}"
+                    if len(regions.at[index, 'temp']) > 1:
+                        regions.at[index, 'formatted_location'] += ' - ' + regions.at[index, 'temp'][1]
 
                 sorted_regions = regions.sort_values(by=['state', 'city'])
                 if sorted_regions.empty:
@@ -417,6 +446,7 @@ def register_callbacks(app):
                 general_region_locations = general_locations[company]
                 general_region_locations['city'] = ''
                 general_region_locations['state'] = ''
+                general_region_locations['temp'] = general_region_locations['comments'].str.split('-')
                 general_region_locations['formatted_location'] = ''
                 for index, row in general_region_locations.iterrows():
                     parts = row['name'].split(', ')
@@ -433,6 +463,8 @@ def register_callbacks(app):
                         general_region_locations.at[index, 'city'] = city
                         general_region_locations.at[index, 'state'] = state
                         general_region_locations.at[index, 'formatted_location'] = f"{city}"
+                    if len(general_region_locations.at[index, 'temp']) > 1:
+                        general_region_locations.at[index, 'formatted_location'] += ' - ' + general_region_locations.at[index, 'temp'][1]
 
                 sorted_general_region_locations = general_region_locations.sort_values(by=['state', 'city'])
                 if not sorted_general_region_locations.empty:
@@ -496,6 +528,49 @@ def register_callbacks(app):
                     )
                 )
 
+                hqs = headquarters[company]
+                hqs['city'] = ''
+                hqs['state'] = ''
+                hqs['formatted_location'] = ''
+                for index, row in hqs.iterrows():
+                    parts = row['name'].split(', ')
+                    if len(parts) == 2:
+                        city, state = parts
+                        if state in abbrev_to_us_state:
+                            state = abbrev_to_us_state[state]
+                        hqs.at[index, 'city'] = city
+                        hqs.at[index, 'state'] = state
+                        hqs.at[index, 'formatted_location'] = f"{state}: {city}"
+                    elif len(parts) == 1:
+                        city = parts[0]
+                        state = 'Unknown'  # or any default value
+                        hqs.at[index, 'city'] = city
+                        hqs.at[index, 'state'] = state
+                        hqs.at[index, 'formatted_location'] = f"{city}"
+
+                sorted_hqs = hqs.sort_values(by=['state', 'city'])
+                if not sorted_hqs.empty:
+                    sorted_hq_list = html.Ul(
+                        [html.Li(loc) for loc in sorted_hqs['formatted_location']])
+                else:
+                    sorted_hq_list = None
+                sorted_hqs['hover_text'] = sorted_hqs['name'] + '<br>' + \
+                                                        sorted_hqs['comments']
+                fig.add_trace(
+                    go.Scattergeo(
+                        lon=sorted_hqs['lon'],
+                        lat=sorted_hqs['lat'],
+                        hoverinfo='text',
+                        text=sorted_hqs['hover_text'],  # Text labels
+                        marker=dict(
+                            size=15,
+                            color='Purple',
+                            opacity=1
+                        ),
+                        name=f"{company} Headquarters"
+                    )
+                )
+
                 fig.update_geos(
                     center=dict(lat=39.8283, lon=-98.5795),
                     lataxis_range=[15, 50],  # Adjust as needed
@@ -517,10 +592,12 @@ def register_callbacks(app):
                         cities_html_list,
                         html.H5(f"{company} ATC Regions:"),
                         regions_html_list,
-                        html.H5(f"{company} General Locations:"),
+                        html.H5(f"{company} General Regions:"),
                         general_regions_html_list,
                         html.H5(f"{company} Offices:"),
-                        sorted_office_list
+                        sorted_office_list,
+                        html.H5(f"{company} Headquarters:"),
+                        sorted_hq_list
                     ], style={'flex': '1', 'min-width': '200px', 'max-height': '400px', 'overflow-y': 'auto'})  # Scroll for long lists
                 ], style={'display': 'flex', 'width': '100%', 'align-items': 'stretch', 'margin-bottom': '20px'})
 
